@@ -2,13 +2,16 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Search, X, Command } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import useTypeahead from '@/hooks/useTypeahead'
 
 export default function SearchBar({ onSearch, variant = 'navbar' }) {
   const [query, setQuery] = useState('')
   const [focused, setFocused] = useState(false)
   const inputRef = useRef(null)
+  const [activeIndex, setActiveIndex] = useState(-1)
   const navigate = useNavigate()
   const debounceRef = useRef(null)
+  const { setQuery: setTaQuery, results, loadingServer } = useTypeahead()
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -28,6 +31,7 @@ export default function SearchBar({ onSearch, variant = 'navbar' }) {
   const handleChange = (e) => {
     const value = e.target.value
     setQuery(value)
+    setTaQuery(value)
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
@@ -44,6 +48,7 @@ export default function SearchBar({ onSearch, variant = 'navbar' }) {
 
   const clearQuery = () => {
     setQuery('')
+    setTaQuery('')
     onSearch?.('')
     inputRef.current?.focus()
   }
@@ -79,6 +84,33 @@ export default function SearchBar({ onSearch, variant = 'navbar' }) {
             }
           `}
         />
+        {/* Suggestions dropdown */}
+        {focused && (results.length > 0 || loadingServer) && (
+          <ul
+            id="typeahead-list"
+            role="listbox"
+            className="absolute left-0 right-0 mt-2 z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden max-h-72 overflow-auto"
+          >
+            {results.map((r, i) => (
+              <li
+                key={r.id}
+                role="option"
+                aria-selected={i === activeIndex}
+                onMouseDown={() => {
+                  navigate(`/question/${r.id}`)
+                }}
+                onMouseEnter={() => setActiveIndex(i)}
+                className={`px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer ${i === activeIndex ? 'bg-slate-100 dark:bg-slate-700' : ''}`}
+              >
+                <div className="text-sm font-medium text-slate-800 dark:text-white truncate">{r.title}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{r.answer_count ? `${r.answer_count} answers` : ''}</div>
+              </li>
+            ))}
+            {loadingServer && (
+              <li className="px-4 py-3 text-sm text-slate-500">Searching online…</li>
+            )}
+          </ul>
+        )}
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
           {query && (
             <button
