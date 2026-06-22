@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Sidebar from '@/components/layout/Sidebar';
-import BackToTop from '@/components/ui/BackToTop';
 
 // Premium background particle configuration
 const particles = Array.from({ length: 12 }, (_, i) => ({
@@ -87,8 +86,6 @@ export default function Layout({ children, showSidebar = false }) {
       </main>
 
       <Footer />
-      <BackToTop />
     </div>
   );
 }
-

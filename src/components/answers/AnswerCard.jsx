@@ -7,9 +7,6 @@ import Button from '@/components/ui/Button'
 import FilePreview from '@/components/ui/FilePreview'
 import { useUpvote } from '@/hooks/useUpvote'
 import { useAuth } from '@/hooks/useAuth'
-import { useTranslation } from '@/hooks/useTranslation'
-import TranslationButton from '@/components/translation/TranslationButton'
-import TranslationBadge from '@/components/translation/TranslationBadge'
 
 function timeAgo(dateString) {
   const now = new Date()
@@ -105,14 +102,6 @@ export default function AnswerCard({ answer, isOwner, isAdmin, onVerify, onRejec
   const [localUpvotes, setLocalUpvotes] = useState(answer.upvotes || 0)
   const [showAiSummary, setShowAiSummary] = useState(false)
 
-  const preferredLanguage = user?.preferred_language || 'en'
-  const answerTranslation = useTranslation({
-    contentId: `answer-${answer.id}`,
-    content: answer.content,
-    autoTargetLanguage: preferredLanguage,
-    autoTranslate: Boolean(user?.preferred_language),
-  })
-
   useEffect(() => {
     if (user) {
       hasUpvotedAnswer(answer.id).then(setUpvoted)
@@ -159,24 +148,8 @@ export default function AnswerCard({ answer, isOwner, isAdmin, onVerify, onRejec
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <TranslationBadge
-            originalLanguage={answerTranslation.originalLanguage}
-            targetLanguage={answerTranslation.currentLanguage}
-          />
-          <TranslationButton
-            originalLanguage={answerTranslation.originalLanguage}
-            currentLanguage={answerTranslation.currentLanguage}
-            isTranslated={answerTranslation.isTranslated}
-            status={answerTranslation.status}
-            error={answerTranslation.error}
-            onTranslate={answerTranslation.translate}
-            onReset={answerTranslation.resetTranslation}
-          />
-        </div>
-
         <div className="prose prose-sm dark:prose-invert max-w-none text-slate-800 dark:text-slate-300 leading-relaxed">
-          <p className="whitespace-pre-wrap">{answerTranslation.displayText}</p>
+          <p className="whitespace-pre-wrap">{answer.content}</p>
         </div>
 
         {answer.content && answer.content.length > 350 && (

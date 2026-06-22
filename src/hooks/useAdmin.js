@@ -11,6 +11,7 @@ export function useAdmin() {
     totalQuestions: 0,
   })
   const [allAnswers, setAllAnswers] = useState([])
+  const [allQuestions, setAllQuestions] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const { isAdmin } = useAuth()
@@ -61,6 +62,37 @@ export function useAdmin() {
 
       setAllAnswers(data || [])
       return data || []
+    } catch (err) {
+      setError(err.message)
+      return []
+    } finally {
+      setLoading(false)
+    }
+  }, [isAdmin])
+
+  const fetchAllQuestions = useCallback(async () => {
+    if (!isAdmin) return
+    setLoading(true)
+    setError(null)
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('questions')
+        .select(`
+          *,
+          users:user_id (id, name, email, avatar),
+          answers:answers (id)
+        `)
+        .order('created_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+
+      const enriched = (data || []).map(q => ({
+        ...q,
+        answer_count: (q.answers || []).length
+      }))
+
+      setAllQuestions(enriched)
+      return enriched
     } catch (err) {
       setError(err.message)
       return []
@@ -133,15 +165,51 @@ export function useAdmin() {
     }
   }, [isAdmin])
 
+  const adminDeleteQuestion = useCallback(async (id) => {
+    if (!isAdmin) throw new Error('Admin only')
+    try {
+      const { error: deleteError } = await supabase
+        .from('questions')
+        .delete()
+        .eq('id', id)
+
+      if (deleteError) throw deleteError
+      setAllQuestions(prev => prev.filter(q => q.id !== id))
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
+  }, [isAdmin])
+
+  const bulkDeleteQuestions = useCallback(async (ids) => {
+    if (!isAdmin) throw new Error('Admin only')
+    try {
+      const { error: deleteError } = await supabase
+        .from('questions')
+        .delete()
+        .in('id', ids)
+
+      if (deleteError) throw deleteError
+      setAllQuestions(prev => prev.filter(q => !ids.includes(q.id)))
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
+  }, [isAdmin])
+
   return {
     metrics,
     allAnswers,
+    allQuestions,
     loading,
     error,
     fetchMetrics,
     fetchAllAnswers,
+    fetchAllQuestions,
     bulkVerify,
     bulkDelete,
     bulkMarkSpam,
+    adminDeleteQuestion,
+    bulkDeleteQuestions,
   }
 }
