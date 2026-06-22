@@ -22,9 +22,13 @@ export default function AskQuestionPage() {
   const navigate = useNavigate()
   const { createQuestion, loading } = useQuestions()
   const { showToast } = useToast()
+
   const [showDuplicates, setShowDuplicates] = useState(false)
   const [duplicates, setDuplicates] = useState([])
   const [pendingData, setPendingData] = useState(null)
+
+  const [checkingDuplicates, setCheckingDuplicates] =
+    useState(false)
 
   const checkDuplicates = useCallback(async (data) => {
     try {
@@ -33,12 +37,33 @@ export default function AskQuestionPage() {
         .select('id, title, answers(id, verification_status)')
         .eq('status', 'active')
 
-      if (existingQuestions && existingQuestions.length > 0) {
+      if (
+        existingQuestions &&
+        existingQuestions.length > 0
+      ) {
+
         const enriched = existingQuestions.map(q => ({
           ...q,
           answer_count: (q.answers || []).length,
         }))
-        const dupes = findDuplicates(enriched, data.title)
+
+        setCheckingDuplicates(true)
+
+        let dupes = []
+
+        try {
+
+          dupes = await findDuplicates(
+            enriched,
+            data.title
+          )
+
+        } finally {
+
+          setCheckingDuplicates(false)
+
+        }
+
         if (dupes.length > 0) {
           setDuplicates(dupes)
           setPendingData(data)
@@ -46,8 +71,18 @@ export default function AskQuestionPage() {
           return true
         }
       }
+
       return false
-    } catch {
+
+    } catch (error) {
+
+      console.error(
+        'Duplicate check failed:',
+        error
+      )
+
+      setCheckingDuplicates(false)
+
       return false
     }
   }, [])
@@ -55,15 +90,35 @@ export default function AskQuestionPage() {
   const submitQuestion = useCallback(async (data) => {
     try {
       const question = await createQuestion(data)
-      showToast('Question posted successfully!', 'success')
+
+      showToast(
+        'Question posted successfully!',
+        'success'
+      )
+
       navigate(`/question/${question.id}`)
+
     } catch (err) {
-      showToast(err.message || 'Failed to post question', 'error')
+
+      showToast(
+        err.message ||
+        'Failed to post question',
+        'error'
+      )
+
     }
   }, [createQuestion, navigate, showToast])
 
   const handleSubmit = async (data) => {
-    const hasDuplicates = await checkDuplicates(data)
+
+    showToast(
+      'Checking for similar questions...',
+      'info'
+    )
+
+    const hasDuplicates =
+      await checkDuplicates(data)
+
     if (!hasDuplicates) {
       await submitQuestion(data)
     }
@@ -71,6 +126,7 @@ export default function AskQuestionPage() {
 
   const handleContinueAnyway = async () => {
     setShowDuplicates(false)
+
     if (pendingData) {
       await submitQuestion(pendingData)
     }
@@ -84,34 +140,53 @@ export default function AskQuestionPage() {
       transition={{ duration: 0.3 }}
     >
       <div className="max-w-5xl mx-auto">
+
         <div className="flex items-center gap-3 mb-8">
           <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
             <HelpCircle className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
           </div>
+
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Ask a Question</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Get help from the community</p>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
+              Ask a Question
+            </h1>
+
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Get help from the community
+            </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Form */}
+
           <div className="lg:col-span-8">
             <Card className="p-6 md:p-8">
-              <QuestionForm onSubmit={handleSubmit} loading={loading} />
+
+              <QuestionForm
+                onSubmit={handleSubmit}
+                loading={
+                  loading ||
+                  checkingDuplicates
+                }
+              />
+
             </Card>
           </div>
 
-          {/* Tips Sidebar */}
           <div className="lg:col-span-4">
             <Card className="p-5 sticky top-24">
+
               <h3 className="text-sm font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                 <Lightbulb className="w-4 h-4 text-amber-500" />
                 Tips for a great question
               </h3>
+
               <div className="space-y-3">
+
                 {tips.map((tip, index) => {
+
                   const Icon = tip.icon
+
                   return (
                     <motion.div
                       key={index}
@@ -121,17 +196,22 @@ export default function AskQuestionPage() {
                       className="flex items-start gap-2.5"
                     >
                       <Icon className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-                      <span className="text-sm text-slate-600 dark:text-slate-400">{tip.text}</span>
+
+                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                        {tip.text}
+                      </span>
                     </motion.div>
                   )
                 })}
+
               </div>
+
             </Card>
           </div>
+
         </div>
       </div>
 
-      {/* Duplicate Warning Modal */}
       <DuplicateWarning
         isOpen={showDuplicates}
         onClose={() => setShowDuplicates(false)}

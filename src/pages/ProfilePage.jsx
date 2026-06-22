@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useQuestions } from '@/hooks/useQuestions'
 import { useAnswers } from '@/hooks/useAnswers'
 import { useToast } from '@/components/ui/Toast'
+import { getSupportedLanguages } from '@/lib/translationService'
 import { supabase } from '@/config/supabase'
 import { Link } from 'react-router-dom'
 import { badgeIcons } from '@/components/ui/BadgeUnlockModal'
@@ -56,6 +57,8 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
+  const [preferredLanguage, setPreferredLanguage] = useState('en')
+  const [savingLanguage, setSavingLanguage] = useState(false)
   
   // Gamification states
   const [globalRank, setGlobalRank] = useState(1)
@@ -68,6 +71,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       setName(user.name || '')
+      setPreferredLanguage(user.preferred_language || 'en')
       loadData()
       loadGamificationData()
     }
@@ -224,6 +228,19 @@ export default function ProfilePage() {
     }
   }
 
+  const handleSavePreferredLanguage = async () => {
+    if (!user) return
+    setSavingLanguage(true)
+    try {
+      await updateProfile({ preferred_language: preferredLanguage })
+      showToast('Preferred language saved!', 'success')
+    } catch (err) {
+      showToast('Failed to save preferred language', 'error')
+    } finally {
+      setSavingLanguage(false)
+    }
+  }
+
   if (!user) return null
 
   const verifiedAnswerCount = userAnswers.filter(a => a.verification_status === 'verified').length
@@ -276,6 +293,9 @@ export default function ProfilePage() {
                     </button>
                   </h1>
                 )}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Mail className="w-3.5 h-3.5" />
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-2 text-sm text-slate-500 dark:text-slate-400">
                   <span className="flex items-center gap-1.5">
                     <Mail className="w-4 h-4" />
@@ -286,6 +306,35 @@ export default function ProfilePage() {
                     Joined {timeAgo(user.created_at)}
                   </span>
                 </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr] items-center">
+                  <label htmlFor="preferredLanguage" className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    Preferred Language
+                  </label>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                    <select
+                      id="preferredLanguage"
+                      value={preferredLanguage}
+                      onChange={(e) => setPreferredLanguage(e.target.value)}
+                      className="w-full max-w-xs rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:focus:border-indigo-400 dark:focus:ring-indigo-500/20"
+                    >
+                      {getSupportedLanguages().map((language) => (
+                        <option key={language.code} value={language.code}>
+                          {language.label}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleSavePreferredLanguage}
+                      loading={savingLanguage}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
+                <Badge variant={user.role === 'admin' ? 'info' : 'default'} className="mt-2">
+                  <Shield className="w-3 h-3 mr-1" />
                 <Badge variant={user.role === 'admin' ? 'info' : 'default'} className="mt-3.5">
                   <Shield className="w-3.5 h-3.5 mr-1.5" />
                   {user.role}

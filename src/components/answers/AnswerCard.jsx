@@ -7,6 +7,9 @@ import Button from '@/components/ui/Button'
 import FilePreview from '@/components/ui/FilePreview'
 import { useUpvote } from '@/hooks/useUpvote'
 import { useAuth } from '@/hooks/useAuth'
+import { useTranslation } from '@/hooks/useTranslation'
+import TranslationButton from '@/components/translation/TranslationButton'
+import TranslationBadge from '@/components/translation/TranslationBadge'
 import { useToast } from '@/components/ui/Toast'
 
 function timeAgo(dateString) {
@@ -111,6 +114,14 @@ export default function AnswerCard({ answer, isOwner, isAdmin, isQuestionOwner, 
   useEffect(() => {
     setLocalScore((answer.upvotes || 0) - (answer.downvotes || 0))
   }, [answer.upvotes, answer.downvotes])
+
+  const preferredLanguage = user?.preferred_language || 'en'
+  const answerTranslation = useTranslation({
+    contentId: `answer-${answer.id}`,
+    content: answer.content,
+    autoTargetLanguage: preferredLanguage,
+    autoTranslate: Boolean(user?.preferred_language),
+  })
 
   useEffect(() => {
     if (user) {
@@ -234,6 +245,24 @@ export default function AnswerCard({ answer, isOwner, isAdmin, isQuestionOwner, 
         )}
       </div>
       <div className="flex-1 min-w-0">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <TranslationBadge
+            originalLanguage={answerTranslation.originalLanguage}
+            targetLanguage={answerTranslation.currentLanguage}
+          />
+          <TranslationButton
+            originalLanguage={answerTranslation.originalLanguage}
+            currentLanguage={answerTranslation.currentLanguage}
+            isTranslated={answerTranslation.isTranslated}
+            status={answerTranslation.status}
+            error={answerTranslation.error}
+            onTranslate={answerTranslation.translate}
+            onReset={answerTranslation.resetTranslation}
+          />
+        </div>
+
+        <div className="prose prose-sm dark:prose-invert max-w-none text-slate-800 dark:text-slate-300 leading-relaxed">
+          <p className="whitespace-pre-wrap">{answerTranslation.displayText}</p>
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0">
             <div className="prose prose-sm dark:prose-invert max-w-none text-slate-800 dark:text-slate-300 leading-relaxed">

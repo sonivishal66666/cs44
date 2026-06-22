@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { Shield, RefreshCw, Clock, CheckCircle, XCircle, AlertTriangle, Inbox } from 'lucide-react'
 import { Shield, RefreshCw, Clock, CheckCircle, XCircle, AlertTriangle, Inbox, MessageCircle, HelpCircle, Trash2, Search, Eye, Trophy, Award, Coins, TrendingUp, User } from 'lucide-react'
 
 import MetricsCards from '@/components/admin/MetricsCards'
@@ -8,7 +8,6 @@ import ModerationTable from '@/components/admin/ModerationTable'
 import BulkActions from '@/components/admin/BulkActions'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
-import Avatar from '@/components/ui/Avatar'
 import { useAdmin } from '@/hooks/useAdmin'
 import { useAnswers } from '@/hooks/useAnswers'
 import { useToast } from '@/components/ui/Toast'
@@ -22,6 +21,10 @@ const filterTabs = [
   { id: 'spam', label: 'Spam', icon: AlertTriangle },
 ]
 
+export default function AdminDashboard() {
+  const { metrics, allAnswers, loading, fetchMetrics, fetchAllAnswers, bulkVerify, bulkDelete, bulkMarkSpam } = useAdmin()
+  const { verifyAnswer, rejectAnswer, markSpam, deleteAnswer } = useAnswers()
+  const { showToast } = useToast()
 function timeAgo(dateString) {
   const now = new Date()
   const date = new Date(dateString)
@@ -86,8 +89,6 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('answers') // 'answers', 'questions', or 'gamification'
   const [activeFilter, setActiveFilter] = useState('all')
   const [selectedIds, setSelectedIds] = useState([])
-  const [selectedQuestionIds, setSelectedQuestionIds] = useState([])
-  const [questionSearch, setQuestionSearch] = useState('')
   const [adminNoteModal, setAdminNoteModal] = useState({ open: false, answerId: null, action: null })
   const [adminNote, setAdminNote] = useState('')
 
@@ -124,6 +125,13 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchMetrics()
+    fetchAllAnswers(activeFilter)
+  }, [fetchMetrics, fetchAllAnswers, activeFilter])
+
+  const handleRefresh = () => {
+    fetchMetrics()
+    fetchAllAnswers(activeFilter)
+    setSelectedIds([])
     if (activeSection === 'answers') {
       fetchAllAnswers(activeFilter)
     } else if (activeSection === 'questions') {
@@ -356,6 +364,25 @@ export default function AdminDashboard() {
         <MetricsCards metrics={metrics} />
       </div>
 
+      {/* Filter Tabs */}
+      <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl overflow-x-auto">
+        {filterTabs.map((tab) => {
+          const Icon = tab.icon
+          const count = tab.id === 'all' ? allAnswers.length :
+            tab.id === 'pending' ? metrics.pendingReviews :
+            tab.id === 'verified' ? metrics.verifiedAnswers :
+            tab.id === 'rejected' ? metrics.flaggedContent :
+            metrics.spamRemoved
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => { setActiveFilter(tab.id); setSelectedIds([]) }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                activeFilter === tab.id
+                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
       {/* Section Switcher Tab (Answers vs Questions vs Gamification) */}
       <div className="flex gap-2 mb-6 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
         <button
@@ -457,41 +484,38 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center justify-between p-4 mb-4 bg-red-500/10 dark:bg-red-500/5 border border-red-500/20 rounded-2xl shadow-sm"
             >
-              <div className="flex items-center gap-2 text-sm text-red-650 dark:text-red-400 font-semibold">
-                <AlertTriangle className="w-4 h-4" />
-                {selectedQuestionIds.length} question{selectedQuestionIds.length !== 1 ? 's' : ''} selected
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="danger"
-                  icon={Trash2}
-                  onClick={handleBulkDeleteQuestions}
-                >
-                  Delete Selected
-                </Button>
-              </div>
-            </motion.div>
-          )}
+              <Icon className="w-4 h-4" />
+              {tab.label}
+              <span className="text-xs bg-slate-200 dark:bg-slate-600 px-1.5 py-0.5 rounded-full">
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
 
-          {/* Questions Table */}
-          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search questions by title, author, or category..."
-                  value={questionSearch}
-                  onChange={(e) => setQuestionSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all duration-300"
-                />
-              </div>
-              <div className="text-xs text-slate-400 font-medium self-end sm:self-center">
-                Showing {filteredQuestions.length} of {allQuestions.length} questions
-              </div>
-            </div>
+      {/* Bulk Actions */}
+      <BulkActions
+        selectedCount={selectedIds.length}
+        onBulkVerify={handleBulkVerify}
+        onBulkDelete={handleBulkDelete}
+        onBulkSpam={handleBulkSpam}
+      />
 
+      {/* Moderation Table */}
+      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <ModerationTable
+          answers={allAnswers}
+          loading={loading}
+          onVerify={handleVerify}
+          onReject={handleReject}
+          onSpam={handleSpam}
+          onDelete={handleDelete}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          onSelectAll={selectAll}
+        />
+      </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
