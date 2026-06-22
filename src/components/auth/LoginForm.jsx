@@ -88,11 +88,11 @@ export default function LoginForm() {
       transition={{ duration: 0.3 }}
     >
       <div>
-        <label className="block text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+        <label className="block text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
           Encrypted Mail
         </label>
         <div className="relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 dark:text-zinc-500" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
           <input
             {...register('email', {
               required: 'Email is required',
@@ -100,7 +100,7 @@ export default function LoginForm() {
             })}
             type="email"
             placeholder="you@domain.com"
-            className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200/50 dark:border-white/10 bg-slate-100/50 dark:bg-white/[0.02] text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:border-purple-500/50 focus:bg-white dark:focus:bg-zinc-950 focus:ring-4 focus:ring-purple-500/5 outline-none transition-all duration-300 text-sm shadow-sm dark:shadow-none"
+            className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.02] text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 outline-none transition-all duration-300 text-sm shadow-sm dark:shadow-none"
           />
         </div>
         {errors.email && (
@@ -112,11 +112,11 @@ export default function LoginForm() {
       </div>
 
       <div>
-        <label className="block text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+        <label className="block text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
           Secure Key
         </label>
         <div className="relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400 dark:text-zinc-500" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-zinc-500" />
           <input
             {...register('password', {
               required: 'Password is required',
@@ -124,14 +124,14 @@ export default function LoginForm() {
             })}
             type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
-            className="w-full pl-12 pr-12 py-3.5 rounded-2xl border border-slate-200/50 dark:border-white/10 bg-slate-100/50 dark:bg-white/[0.02] text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:border-purple-500/50 focus:bg-white dark:focus:bg-zinc-950 focus:ring-4 focus:ring-purple-500/5 outline-none transition-all duration-300 text-sm shadow-sm dark:shadow-none"
+            className="w-full pl-11 pr-12 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.02] text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 outline-none transition-all duration-300 text-sm shadow-sm dark:shadow-none"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300 cursor-pointer"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300 cursor-pointer"
           >
-            {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
         {errors.password && (
@@ -146,18 +146,13 @@ export default function LoginForm() {
         <label className="flex items-center gap-2 cursor-pointer select-none">
           <input
             type="checkbox"
-            className="w-4.5 h-4.5 rounded border-slate-300 dark:border-white/10 text-purple-600 focus:ring-purple-500/40 dark:focus:ring-offset-zinc-950 cursor-pointer"
+            className="w-4 h-4 rounded border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.02] text-purple-600 focus:ring-purple-500/50 dark:focus:ring-offset-zinc-950"
           />
-          <span className="text-sm text-slate-500 dark:text-zinc-400 font-medium">Remember session</span>
+          <span className="text-xs text-slate-500 dark:text-zinc-400">Remember session</span>
         </label>
       </div>
 
-      <Button
-        type="submit"
-        variant="primary"
-        loading={loading}
-        className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] active:bg-[#6d28d9] dark:bg-[#8b5cf6] dark:hover:bg-[#7c3aed] border-none py-3.5 rounded-2xl text-white font-bold text-sm transition-all duration-200 shadow-[0_4px_20px_rgba(139,92,246,0.25)] hover:shadow-[0_6px_24px_rgba(139,92,246,0.35)] cursor-pointer"
-      >
+      <Button type="submit" variant="primary" loading={loading} className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-none py-3 shadow-[0_0_20px_rgba(168,85,247,0.25)]">
         Establish Connection
       </Button>
     </motion.form>

@@ -14,6 +14,9 @@ import { useAnswers } from '@/hooks/useAnswers'
 import { useUpvote } from '@/hooks/useUpvote'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
+import { useTranslation } from '@/hooks/useTranslation'
+import TranslationButton from '@/components/translation/TranslationButton'
+import TranslationBadge from '@/components/translation/TranslationBadge'
 
 function timeAgo(dateString) {
   const now = new Date()
@@ -38,6 +41,20 @@ export default function QuestionDetailPage() {
   const { showToast } = useToast()
   const [upvoted, setUpvoted] = useState(false)
   const [localUpvotes, setLocalUpvotes] = useState(0)
+
+  const preferredLanguage = user?.preferred_language || 'en'
+  const titleTranslation = useTranslation({
+    contentId: `question-title-${question?.id}`,
+    content: question?.title,
+    autoTargetLanguage: preferredLanguage,
+    autoTranslate: Boolean(user?.preferred_language),
+  })
+  const descriptionTranslation = useTranslation({
+    contentId: `question-description-${question?.id}`,
+    content: question?.description,
+    autoTargetLanguage: preferredLanguage,
+    autoTranslate: Boolean(user?.preferred_language),
+  })
 
   useEffect(() => {
     if (id) {
@@ -174,14 +191,58 @@ export default function QuestionDetailPage() {
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-4">
-              {question.title}
-            </h1>
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">
+                    {titleTranslation.displayText}
+                  </h1>
+                  {titleTranslation.isTranslated && (
+                    <div className="mt-2">
+                      <TranslationBadge
+                        originalLanguage={titleTranslation.originalLanguage}
+                        targetLanguage={titleTranslation.currentLanguage}
+                      />
+                    </div>
+                  )}
+                </div>
+                <TranslationButton
+                  originalLanguage={titleTranslation.originalLanguage}
+                  currentLanguage={titleTranslation.currentLanguage}
+                  isTranslated={titleTranslation.isTranslated}
+                  status={titleTranslation.status}
+                  error={titleTranslation.error}
+                  onTranslate={titleTranslation.translate}
+                  onReset={titleTranslation.resetTranslation}
+                />
+              </div>
 
-            <div className="prose prose-slate dark:prose-invert max-w-none mb-6">
-              <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-                {question.description}
-              </p>
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                      {descriptionTranslation.displayText}
+                    </p>
+                    {descriptionTranslation.isTranslated && (
+                      <div className="mt-2">
+                        <TranslationBadge
+                          originalLanguage={descriptionTranslation.originalLanguage}
+                          targetLanguage={descriptionTranslation.currentLanguage}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <TranslationButton
+                    originalLanguage={descriptionTranslation.originalLanguage}
+                    currentLanguage={descriptionTranslation.currentLanguage}
+                    isTranslated={descriptionTranslation.isTranslated}
+                    status={descriptionTranslation.status}
+                    error={descriptionTranslation.error}
+                    onTranslate={descriptionTranslation.translate}
+                    onReset={descriptionTranslation.resetTranslation}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Attachment */}

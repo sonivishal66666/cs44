@@ -1,127 +1,656 @@
+<div align="center">
+
+<br />
+
 # 🎯 AnswerHub
 
-AnswerHub is a complete, production-ready, community-driven Q&A and FAQ platform designed for institutional portals and university hubs. Built with **React 19**, **Vite**, **Tailwind CSS v4**, and **Supabase**, it features a secure role-based access control system and a unique moderated answer pipeline to ensure content quality and institutional integrity.
+### *The Intelligent Community Q&A Platform*
 
-Now redesigned with a state-of-the-art **Obsidian (Deep Dark) & Paper (Pristine Light) Developer Aesthetic** showcasing floating celestial dust particles, self-drawing SVG animations, dynamic responsive themes, and high-fidelity spring transitions.
+<br />
+
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-FF0055?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+
+<br />
+
+**A production-grade, community-driven Q&A and FAQ platform** engineered for institutional portals, university hubs, and knowledge-sharing communities. Featuring a moderated answer pipeline, reputation & badge gamification, AI-powered summaries, multi-language translation, voice-enabled search, text-to-speech accessibility, real-time leaderboards, and a cinematic dark/light developer aesthetic.
+
+<br />
+
+[🚀 Getting Started](#-getting-started) · [✨ Features](#-feature-highlights) · [🏆 Gamification](#-reputation--badge-system) · [🏗️ Architecture](#%EF%B8%8F-architecture) · [📄 License](#-license)
+
+<br />
+
+</div>
 
 ---
 
-## 🌟 Key Product Features
+## ✨ Feature Highlights
 
-### 👤 Role-Based Access Control (RBAC)
-*   **Guest:** Can browse verified answers, search questions, view FAQ quick summaries, and filter by categories.
-*   **Registered User:** Can sign up/in (via email/password), ask new questions (with duplicate detection warning and file attachments), submit answers, edit their own submissions, upvote questions/answers, and track notifications.
-*   **Admin:** Has access to a comprehensive **Moderation Dashboard** to review pending answers, approve/reject answers, add admin notes, flag content as spam, run bulk operations, and monitor platform metrics.
+<table>
+<tr>
+<td width="50%">
 
-### 🛡️ Moderated Answer Verification Pipeline
-*   **Core Rule:** Answers submitted by users remain **private** and are only visible to the author and admins until they are verified by an administrator.
-*   **Real-time Notifications:** Authors are instantly notified via an in-app notification bell when their submitted answers are approved, rejected, or flagged, along with custom admin feedback notes.
+### 🔐 Role-Based Access Control
+Fine-grained RBAC with three permission tiers:
+- **Guest** — Browse verified answers, search, view FAQs
+- **User** — Ask questions, submit answers, upvote, track notifications
+- **Admin** — Full moderation dashboard with bulk operations, metrics, flagging review, and content management
 
-### 🧠 Smart Duplicate Question Warning
-*   Uses **Fuse.js** fuzzy matching algorithms to scan existing questions in real-time as a user types.
-*   Presents a helpful duplicate warning modal displaying matching questions and similarity scores before submission, giving users the choice to view existing answers or "Ask Anyway".
+</td>
+<td width="50%">
 
-### 🚫 Automatic Heuristic Spam Detector
-*   An inline, automatic spam analyzer scans answers upon submission for repeated characters, excessive URLs, promotional keywords, and excessive uppercase letters.
-*   Flagged answers are automatically redirected to the admin moderation queue as `spam`, preserving feed hygiene.
+### 🛡️ Moderated Answer Pipeline
+Enterprise-grade content quality assurance:
+- Submitted answers are **private by default** until admin verification
+- Four-state workflow: `pending` → `verified` / `rejected` / `spam`
+- Authors receive **real-time notifications** with admin feedback notes
+- ✅ **Accepted Answer** — Question owners can mark the best answer
 
-### 🔮 Local Extractive NLP AI Summarizer
-*   **100% Free & Client-Side:** Evaluates long answers (exceeding 350 characters or roughly 7-8 lines) directly inside the user's browser in under 5ms, with absolutely no external API calls, private keys, or training costs.
-*   **Sentence Frequency Scoring:** Implements a pure-JS Extractive Natural Language Processing (NLP) algorithm that filters out common stop words, scores sentence information density based on noun/verb frequency distributions, and extracts the top 2 highest-scoring key insights.
-*   **Collapsible Glassmorphic Drawer:** Renders a gorgeous, spring-dampened `✨ AI Sparkle Summary` panel utilizing premium frosted borders and soft violet glows, maintaining absolute readability in both Obsidian Dark and Paper Light modes.
+</td>
+</tr>
+<tr>
+<td width="50%">
 
-### 🎨 State-of-the-Art Obsidian & Paper Developer Theme
-*   **Tactile Spring Physics:** Smooth spring-dampened motion transitions powered by **Framer Motion** applied to active routes, feed cards, mobile drawers, and profile selectors.
-*   **Floating Particle Backdrops:** A floating cosmic particle emitter inside `Layout.jsx` organically drifts glowing sparkles across the viewport in front of slow-breathing purple/indigo ambient nebulas.
-*   **Self-Drawing SVG Toasts:** The slide-in toast notification system features custom inline SVGs that dynamically sketch out success, error, warning, or info vectors when rendered, overlaying frosted glassmorphic containers.
-*   **Responsive Theme Toggling:** A localStorage-persisted dark/light switch dynamically re-renders all layout properties (`bg-slate-50 dark:bg-[#05050f] text-slate-900 dark:text-zinc-50`), inputs, checkmarks, checkboxes, and sidebars for complete readability.
-*   **Robust Network Safeguards:** 
-    *   *Global Fetch Timeout:* Intercepts all client-level Supabase network calls using native browser `AbortController` signals to abort hanging requests after 5 seconds, preventing connection pools from exhausting and locking skeleton loaders.
-    *   *One-Time Auto-Healing Recovery Watchdog:* Safely clears corrupted localStorage session tokens and performs a single-instance recovery reload if initialized session fetches remain stuck for over 4.5 seconds.
+### 🏆 Reputation & Badge System
+Full gamification engine to drive engagement:
+- **Reputation Points** — Earn points for asking, answering, upvotes, accepted answers, and daily logins
+- **🥉🥈🥇 Tiered Badges** — Bronze, Silver, Gold, and Special badges
+- **📈 Progress Tracker** — Visual progress bar toward next badge
+- **🔥 Leaderboard** — Live rankings of top contributors
+
+</td>
+<td width="50%">
+
+### 🎙️ Voice Search (Voice Chat)
+Hands-free voice input powered by the **Web Speech API**:
+- **Search bar** — Tap the microphone to speak your query
+- **Ask Question** — Dictate both title and description fields
+- **FAQ search** — Voice-enabled FAQ filtering
+- Real-time interim transcription with automatic finalization
+- Graceful fallback for unsupported browsers
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔊 Text-to-Speech (TTS)
+Built-in accessibility for content consumption:
+- **Listen to any question** — One-tap playback on question cards
+- **FAQ answers read aloud** — Audio playback for every FAQ entry
+- Visual speaking indicator with stop/play toggle
+- Uses native `SpeechSynthesis` API — zero external dependencies
+
+</td>
+<td width="50%">
+
+### 🌐 Multi-Language Translation
+Break language barriers with real-time translation:
+- Translate questions and answers into **multiple languages**
+- Seamless inline translation UI
+- Supports global user communities
+- Powered by translation API integration
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔍 Type-Ahead Autocomplete
+Instant search suggestions as you type:
+- Real-time query predictions from existing questions
+- Reduces search time and improves discoverability
+- Keyboard-navigable suggestion dropdown
+- Powered by fuzzy matching with **Fuse.js**
+
+</td>
+<td width="50%">
+
+### 🚩 Content Flagging
+Community-driven content moderation:
+- **Flag inappropriate questions or answers** for admin review
+- Flag reasons include: spam, offensive, off-topic, duplicate
+- Flagged content enters the **admin moderation queue**
+- Keeps the community safe and professional
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🧠 Smart Duplicate Detection
+AI-powered question deduplication:
+- **Fuse.js fuzzy matching** scans existing questions in real-time as you type
+- Displays similarity scores and matching questions before submission
+- Users can "View Existing Answers" or choose to "Ask Anyway"
+
+</td>
+<td width="50%">
+
+### 🚫 Heuristic Spam Detector
+Automatic content quality filtering:
+- Scans for repeated characters, excessive URLs, promotional keywords, and ALL-CAPS
+- Flagged answers are **auto-redirected** to admin moderation queue as `spam`
+- Zero false positive tolerance with multi-signal heuristic scoring
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔮 Client-Side AI Summarizer
+100% free, privacy-first NLP summaries:
+- Extractive NLP algorithm runs **entirely in-browser** in under 5ms
+- Sentence frequency scoring with stop-word filtering
+- Extracts top 2 key insights from long answers (350+ characters)
+- Rendered in a collapsible `✨ AI Sparkle Summary` glassmorphic drawer
+
+</td>
+<td width="50%">
+
+### 📍 Track Your Questions
+Never lose sight of your submissions:
+- **Real-time status tracking** for all your questions
+- See answer count, views, upvotes, and verification status
+- Get notified when answers are posted or verified
+- Full activity history on your profile dashboard
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔑 Authentication System
+Flexible, secure authentication:
+- **Email/Password** sign-up and login
+- **Forgot Password** — Email-based password reset flow
+- Session persistence across page refreshes
+- Automatic session recovery with watchdog timer
+
+</td>
+<td width="50%">
+
+### 🎨 Obsidian & Paper Theme System
+Cinematic dual-theme experience:
+- **Obsidian Dark** — Deep dark mode with cosmic particle backdrops
+- **Paper Light** — Pristine light mode with subtle gradients
+- localStorage-persisted theme preference
+- Spring-physics page transitions via Framer Motion
+- Self-drawing SVG toast notifications
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🏆 Reputation & Badge System
+
+### Point System
+
+| Action | Points |
+|:-------|-------:|
+| Ask a Question | **+5** |
+| Post an Answer | **+10** |
+| Answer Gets Upvoted | **+10** |
+| Question Gets Upvoted | **+5** |
+| Accepted Answer | **+30** |
+| Daily Login | **+2** |
+| Downvote Received | **-2** |
+
+### Badge Tiers
+
+<table>
+<tr>
+<td width="33%" align="center">
+
+#### 🥉 Bronze Badges
+**Beginner Contributor** — 10 pts<br/>
+**First Question** — Ask your first question<br/>
+**First Answer** — Post your first answer
+
+</td>
+<td width="33%" align="center">
+
+#### 🥈 Silver Badges
+**Knowledge Sharer** — 100 pts<br/>
+**10 Accepted Answers**<br/>
+**Helpful Member**
+
+</td>
+<td width="33%" align="center">
+
+#### 🥇 Gold Badges
+**Expert Contributor** — 500 pts<br/>
+**50 Upvotes Received**<br/>
+**Problem Solver**
+
+</td>
+</tr>
+</table>
+
+### 🌟 Special Badges
+
+| Badge | Criteria |
+|:------|:---------|
+| 👑 **Community Leader** | Top reputation holder in the community |
+| 🔥 **Top Contributor of the Month** | Most active contributor in the current month |
+| 🚀 **Fast Responder** | Consistently answers within minutes |
+| 💡 **Innovation Guru** | Answers with highest quality ratings |
+
+### 🎯 Progress Tracker
+
+Visual progress bars show users how close they are to their next badge:
+
+```
+Knowledge Sharer Badge
+████████░░ 80/100 Points
+
+Expert Contributor Badge
+██░░░░░░░░ 120/500 Points
+```
+
+### 🔥 Leaderboard
+
+Live rankings of top contributors displayed platform-wide:
+
+```
+🏅 1. Vishal Soni     1,250 pts   👑🥇🔥
+🏅 2. Arnav             980 pts   🥇🥈
+🏅 3. Aryan             870 pts   🥈🥈
+🏅 4. Priya             650 pts   🥈
+🏅 5. Rahul             420 pts   🥉
+```
+
+---
+
+## ✅ Accepted Answer System
+
+- Question owners can **mark one answer as the accepted answer**
+- ✅ Green checkmark appears on the accepted answer
+- Accepted answer is **pinned to the top** of the answer list
+- The answerer receives **+30 reputation points**
+- Improves content discoverability for future visitors
+
+---
+
+## 📈 User Profile Dashboard
+
+Every registered user gets a comprehensive profile showcasing:
+
+| Metric | Description |
+|:-------|:------------|
+| 🏆 **Total Reputation** | Cumulative reputation points earned |
+| 🎖️ **Badges Earned** | All bronze, silver, gold, and special badges |
+| ❓ **Questions Asked** | Total questions submitted |
+| 💬 **Answers Posted** | Total answers contributed |
+| ✅ **Accepted Answers** | Number of answers marked as accepted |
+| 📊 **Ranking Position** | Current leaderboard position |
+
+| 🎯 **Progress to Next Badge** | Visual progress bar |
+
+---
+
+## 🏗️ Architecture
+
+### System Overview
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                         CLIENT (SPA)                             │
+│   React 19 · Vite 8 · Tailwind CSS v4 · Framer Motion 12        │
+├────────┬────────┬────────┬────────┬────────┬────────┬────────────┤
+│  Auth  │Question│ Answer │ Search │ Voice  │Translation│
+│Context │  Hook  │  Hook  │  Hook  │STT/TTS │  Engine   │
+├────────┴────────┴────────┴────────┴────────┴───────────┤
+│  Reputation Engine · Badge System · Leaderboard                  │
+├──────────────────────────────────────────────────────────────────┤
+│               Supabase JS Client (v2.106+)                       │
+│              ┌──────────┬──────────┬──────────┐                  │
+│              │   Auth   │ Database │ Storage  │                  │
+│              │  (JWT)   │ (REST)   │ (S3-API) │                  │
+└──────────────┴──────────┴──────────┴──────────┴──────────────────┘
+                            │
+┌───────────────────────────┴──────────────────────────────────────┐
+│                      SUPABASE BACKEND                            │
+│   PostgreSQL · Row-Level Security · Edge Functions · Realtime    │
+├──────────────────────────────────────────────────────────────────┤
+│   8+ Tables · 5+ RPC Functions · 16+ RLS Policies · 9+ Indexes  │
+│   Cascade Deletes · Composite Constraints · Auto Triggers        │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Project Structure
+
+```
+Answerhub/
+├── public/                        # Static assets
+├── supabase/
+│   └── schema.sql                 # Full database schema, triggers, RLS policies
+├── src/
+│   ├── components/
+│   │   ├── admin/                 # Moderation dashboard, flagging review
+│   │   ├── answers/               # Answer cards, forms, accepted answer UI
+│   │   ├── auth/                  # ProtectedRoute, GuestRoute guards
+│   │   ├── layout/                # Navbar, Sidebar, Footer, Layout shell
+│   │   ├── notifications/         # Real-time notification bell & dropdown
+│   │   ├── questions/             # QuestionCard, QuestionForm, QuestionFeed
+│   │   ├── search/                # SearchBar with voice input & type-ahead
+│   │   └── ui/                    # Design system: Button, Modal, Toast,
+│   │                              #   Card, Input, Avatar, Badge, Skeleton,
+│   │                              #   Tooltip, ThemeToggle, BackToTop
+│   ├── config/
+│   │   └── supabase.js            # Supabase client initialization
+│   ├── contexts/
+│   │   └── AuthContext.jsx        # Global auth state with session persistence
+│   ├── hooks/
+│   │   ├── useAdmin.js            # Admin moderation & flagging operations
+│   │   ├── useAnswers.js          # Answer CRUD + verification + accepted answers
+│   │   ├── useAuth.js             # Auth context consumer
+│   │   ├── useCategories.js       # Category fetching
+│   │   ├── useFileUpload.js       # Supabase Storage file uploads
+│   │   ├── useNotifications.js    # Notification state management
+│   │   ├── useQuestions.js        # Question CRUD + upvoting + deletion
+│   │   ├── useSearch.js           # Fuzzy search + type-ahead + analytics
+│   │   ├── useSpeechToText.js     # 🎙️ Web Speech API (STT) hook
+│   │   ├── useTextToSpeech.js     # 🔊 SpeechSynthesis (TTS) hook
+│   │   └── useUpvote.js           # Optimistic upvote toggling
+│   ├── lib/                       # Utility functions
+│   ├── pages/
+│   │   ├── AdminDashboard.jsx     # Metrics, bulk moderation, flag queue
+│   │   ├── AskQuestionPage.jsx    # Question form with voice dictation
+│   │   ├── FaqPage.jsx            # FAQ browser with STT & TTS
+│   │   ├── ForgotPasswordPage.jsx # Email-based password reset
+│   │   ├── HomePage.jsx           # Main feed with category filtering
+│   │   ├── LoginPage.jsx          # Email/password login
+│   │   ├── NotFoundPage.jsx       # Animated 404 page
+│   │   ├── ProfilePage.jsx        # Stats, reputation, badges
+│   │   ├── QuestionDetailPage.jsx # Full question + answers + accepted
+│   │   ├── SearchPage.jsx         # Global search results
+│   │   └── SignupPage.jsx         # User registration
+│   ├── App.jsx                    # Route definitions with AnimatePresence
+│   ├── main.jsx                   # App entry point
+│   └── index.css                  # Global styles & design tokens
+├── index.html
+├── vite.config.js
+├── vercel.json                    # Vercel SPA routing config
+└── package.json
+```
 
 ---
 
 ## 💻 Technology Stack
 
-*   **Frontend Core:** React 19, Vite, React Router, React Hook Form
-*   **Styling & Icons:** Tailwind CSS v4 (CSS-first engine), Lucide Icons
-*   **Animations:** Framer Motion
-*   **Backend & DB:** Supabase (PostgreSQL, Auth, Storage, Realtime Pub/Sub, Edge Triggers)
-*   **Search Engine:** Fuse.js (Client-side fuzzy query engine)
+| Layer | Technology | Version | Purpose |
+|:------|:-----------|:--------|:--------|
+| **Frontend Framework** | React | 19 | Component architecture with hooks |
+| **Build Tool** | Vite | 8 | Lightning-fast HMR and optimized production builds |
+| **Styling** | Tailwind CSS | v4 | CSS-first utility engine with design tokens |
+| **Animations** | Framer Motion | 12 | Spring-physics transitions & micro-interactions |
+| **Icons** | Lucide React | 1.17 | Consistent, tree-shakeable icon library |
+| **Forms** | React Hook Form | 7 | Performant form state management |
+| **Routing** | React Router | 7 | Client-side navigation with route guards |
+| **Backend & DB** | Supabase | PostgreSQL | Auth, Database, Storage, Realtime |
+| **Search Engine** | Fuse.js | 7 | Client-side fuzzy matching & similarity scoring |
+| **Voice Input** | Web Speech API | Native | Browser speech-to-text recognition |
+| **Audio Output** | SpeechSynthesis API | Native | Browser text-to-speech playback |
+
+| **Deployment** | Vercel | — | Edge-optimized SPA hosting |
+
+---
+
+## 🗄️ Database Schema
+
+The PostgreSQL database is organized into **8+ core tables** with strict relational constraints, Row-Level Security (RLS) policies, and cascade delete rules:
+
+```
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│    auth.users     │────▶│      users       │     │    categories    │
+│  (Supabase Auth)  │     │  id, name, email │     │  id, name, icon  │
+└──────────────────┘     │  role, avatar    │     └────────┬─────────┘
+                          │  reputation, rank │              │
+                          └───────┬──────────┘              │
+                                  │                         │
+                    ┌─────────────┼─────────────────────────┘
+                    │             │
+              ┌─────▼─────────────▼──────┐
+              │        questions          │
+              │  id, title, description   │
+              │  category, tags, views    │
+              │  upvotes, attachment_url  │
+              │  flags                    │
+              └──────┬───────────┬───────┘
+                     │           │
+        ┌────────────▼──┐  ┌────▼───────────────┐
+        │    answers     │  │ question_upvotes   │
+        │  id, content   │  │ question_id,       │
+        │  verification  │  │ user_id (PK)       │
+        │  is_accepted   │  └────────────────────┘
+        │  admin_note    │
+        └──────┬─────────┘
+               │
+        ┌──────▼─────────────┐     ┌──────────────────┐
+        │  answer_upvotes    │     │   notifications   │
+        │  answer_id,        │     │  id, user_id,     │
+        │  user_id (PK)      │     │  message, is_read │
+        └────────────────────┘     └──────────────────┘
+
+        ┌──────────────────────┐
+        │  search_analytics    │
+        │  id, search_term,    │
+        │  user_id, created_at │
+        └──────────────────────┘
+```
+
+### Key Database Features
+
+| Feature | Implementation |
+|:--------|:---------------|
+| **Auto User Profiles** | Database trigger on `auth.users` INSERT automatically creates a `public.users` row |
+| **Cascade Deletes** | Deleting a question removes all associated answers, upvotes, and notifications |
+| **Duplicate Vote Prevention** | Composite primary keys on upvote tables enforce one-vote-per-user |
+| **Trending Analytics** | RPC function `get_trending_searches()` returns top 10 search terms from the past 7 days |
+| **Toggle Upvotes** | RPC functions atomically insert/delete upvote records and update counters |
+| **16+ RLS Policies** | Fine-grained row-level security ensuring users only access authorized data |
+| **Reputation Tracking** | Points calculated from user actions and stored for leaderboard rankings |
+
+
+---
+
+## 🎙️ Voice & Accessibility Features
+
+### Speech-to-Text (Voice Search / Voice Chat)
+
+The `useSpeechToText` hook wraps the native **Web Speech Recognition API** to provide hands-free voice input across the platform:
+
+| Feature | Details |
+|:--------|:--------|
+| **Continuous Recognition** | Keeps listening until manually stopped |
+| **Interim Results** | Shows real-time transcription as you speak |
+| **Multi-Language** | Defaults to `en-US`, configurable via `lang` parameter |
+| **Error Recovery** | Graceful handling of microphone permission errors |
+| **Used In** | Search bar, Ask Question (title + description), FAQ search |
+
+### Text-to-Speech (Read Aloud)
+
+The `useTextToSpeech` hook uses the native **SpeechSynthesis API** for audio content playback:
+
+| Feature | Details |
+|:--------|:--------|
+| **One-Tap Playback** | Single button to play/stop on any content |
+| **Unique Tracking** | Each content item has a unique speech ID to track active playback |
+| **Auto Cleanup** | Speech synthesis is cancelled on component unmount |
+| **Used In** | Question cards, FAQ answer panels |
 
 ---
 
 ## 🚀 Getting Started
 
-### 📋 Prerequisites
-*   Node.js (v18 or higher recommended)
-*   npm or yarn
-*   A free [Supabase](https://supabase.com) account
+### Prerequisites
 
-### 🛠️ Installation & Setup
+| Requirement | Minimum Version |
+|:------------|:----------------|
+| **Node.js** | v18+ |
+| **npm** | v9+ |
+| **Supabase Account** | [Free Tier](https://supabase.com) |
 
-1.  **Clone & Install Dependencies:**
-    ```bash
-    git clone https://github.com/sonivishal66666/Answerhub.git
-    cd Answerhub
-    npm install
-    ```
+### Installation
 
-2.  **Database Initialization:**
-    *   Create a new project on your **Supabase Dashboard**.
-    *   Go to **SQL Editor** in the left sidebar and click **New Query** -> **Blank Query**.
-    *   Copy the entire SQL schema script located in [supabase/schema.sql](supabase/schema.sql) and paste it into the editor.
-    *   Click **Run** to set up tables, triggers, search analytics, and seed categories.
+**1. Clone & Install**
 
-3.  **Storage Configuration:**
-    *   In the Supabase Dashboard, navigate to **Storage**.
-    *   Click **New Bucket** and name it `attachments`.
-    *   Make sure to toggle **Public Bucket** to **ON** (required for hosting image and document attachments) and click **Create**.
+```bash
+git clone https://github.com/sonivishal66666/Answerhub.git
+cd Answerhub
+npm install
+```
 
-4.  **Local API Configuration:**
-    *   Our app's Supabase connection has been pre-configured directly inside the client engine. No additional `.env` variables are required for immediate execution.
-    *   To view or manage database endpoints, refer to the client file:
-        *   [`src/config/supabase.js`](src/config/supabase.js)
+**2. Database Setup**
 
-5.  **Run Development Server:**
-    ```bash
-    npm run dev
-    ```
-    Open [http://localhost:5173](http://localhost:5173) in your browser.
+1. Create a new project on the [Supabase Dashboard](https://supabase.com/dashboard)
+2. Navigate to **SQL Editor** → **New Query** → **Blank Query**
+3. Copy the entire contents of [`supabase/schema.sql`](supabase/schema.sql) and paste into the editor
+4. Click **Run** — this creates all tables, triggers, RLS policies, indexes, and seed data
 
-6.  **Build for Production:**
-    ```bash
-    npm run build
-    ```
+**3. Storage Configuration**
+
+1. In the Supabase Dashboard, go to **Storage**
+2. Click **New Bucket** → name it `attachments`
+3. Toggle **Public Bucket** to **ON** → Click **Create**
+
+**4. Environment Configuration**
+
+```bash
+cp .env.example .env
+```
+
+Update `.env` with your Supabase project credentials:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+**5. Launch Development Server**
+
+```bash
+npm run dev
+```
+
+Open [**http://localhost:5173**](http://localhost:5173) in your browser.
+
+**6. Production Build**
+
+```bash
+npm run build
+npm run preview     # Preview the production build locally
+```
 
 ---
 
-## 📂 Database Architecture
+## 🔑 Admin Dashboard Setup
 
-The PostgreSQL database is organized into **8 core tables** with strict relational constraints and Row-Level Security (RLS) policies:
+To activate the admin moderation dashboard:
 
-*   `users`: Syncs automatically with Supabase `auth.users` via database triggers, maintaining custom display names, avatars, and roles (`user`/`admin`).
-*   `categories`: Stores navigation headers (e.g. Placements, DSA, Hostel).
-*   `questions`: Holds user inquiries, views counters, upvotes, and attachment URLs.
-*   `answers`: Houses answers linked to questions, tracking verification status (`pending`/`verified`/`rejected`/`spam`).
-*   `notifications`: Tracks real-time, user-specific notifications for approved answers.
-*   `question_upvotes` & `answer_upvotes`: Prevents duplicate voting through unique composite keys.
-*   `search_analytics`: Stores search histories and queries to generate trending keyword lists.
+1. **Create an account** on the running application via Sign Up
+2. Open the **Supabase Dashboard** → **Table Editor** → `users` table
+3. Locate your user row and change the `role` column from `user` to `admin`
+4. **Refresh your browser** — the **Admin** link will appear in the navigation bar
+
+### Admin Capabilities
+
+| Capability | Description |
+|:-----------|:------------|
+| 📊 **Platform Metrics** | Total questions, answers, pending reviews, user counts, and reputation stats |
+| ✅ **Bulk Moderation** | Approve, reject, or flag multiple answers at once |
+| 🗑️ **Question Deletion** | Delete any question with premium animated confirmation dialogs |
+| 🚩 **Flag Review Queue** | Review and resolve community-flagged content |
+| 📝 **Admin Notes** | Attach feedback notes to reviewed answers |
+| 🔔 **Auto-Notifications** | Authors are notified of verification decisions in real-time |
+| 🏆 **Reputation Management** | View and manage user reputation and badge assignments |
 
 ---
 
-## 🔑 Activating the Admin Dashboard
+## 🌐 Deployment
 
-To gain access to the Moderation Dashboard and manage submitted answers:
-1.  Navigate to your running website and click **Sign Up** to create an account.
-2.  Go to your **Supabase Dashboard** -> **Table Editor** -> select the `users` table.
-3.  Locate your row, double-click the `role` column, change the value from `'user'` to `'admin'`, and press Enter to save.
-4.  Refresh your browser. An **Admin** link will appear in the navigation bar, granting you access to the metrics cards, bulk approval tools, and user queues.
+### Vercel (Recommended)
+
+1. Push your repository to GitHub
+2. Import the project on [Vercel](https://vercel.com)
+3. Add environment variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+4. Deploy — the included `vercel.json` handles SPA routing automatically
+
+### Manual Build
+
+```bash
+npm run build          # Outputs to ./dist
+npx serve dist         # Serve locally for testing
+```
+
+---
+
+## 🎯 Complete Feature Summary
+
+| # | Feature | Description |
+|:-:|:--------|:------------|
+| 1 | 🔐 Role-Based Access Control | Guest, User, and Admin permission tiers |
+| 2 | 🛡️ Moderated Answer Pipeline | Admin-verified answers with 4-state workflow |
+| 3 | 🏆 Reputation System | Points for actions (ask, answer, upvote, accepted) |
+| 4 | 🎖️ Badge System | Bronze, Silver, Gold, and Special achievement badges |
+| 5 | 🔥 Leaderboard | Live rankings of top contributors |
+| 6 | ✅ Accepted Answers | Question owners mark the best answer (+30 pts) |
+| 7 | 📈 Progress Tracker | Visual progress bars toward next badge |
+| 8 | 🎙️ Voice Search (Voice Chat) | Hands-free voice input across the platform |
+| 9 | 🔊 Text-to-Speech | Listen to questions and FAQ answers |
+| 10 | 🌐 Translation | Multi-language translation for questions & answers |
+| 11 | 🔍 Type-Ahead | Autocomplete search suggestions as you type |
+| 12 | 🚩 Content Flagging | Flag inappropriate questions or answers |
+| 13 | 📍 Track Your Questions | Real-time status tracking for submissions |
+| 14 | 🔑 Forgot Password | Email-based password reset flow |
+| 15 | 🧠 Duplicate Detection | Fuse.js fuzzy matching with similarity scores |
+| 16 | 🚫 Spam Detector | Heuristic auto-flagging of spam content |
+| 17 | 🔮 AI Summarizer | Client-side NLP extractive summaries |
+| 18 | 📎 File Attachments | Upload images and documents to questions/answers |
+| 19 | 🔔 Real-Time Notifications | In-app notification bell with live updates |
+| 20 | 🎨 Obsidian & Paper Themes | Cinematic dark/light theme system |
+| 21 | ✨ Spring-Physics Animations | Framer Motion transitions & micro-interactions |
+| 22 | 🌌 Cosmic Particle Backdrops | Floating particle emitter with ambient nebulas |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. **Fork** the repository
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** your changes: `git commit -m "feat: add amazing feature"`
+4. **Push** to the branch: `git push origin feature/amazing-feature`
+5. **Open** a Pull Request
 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
 
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-dikshya soni
+---
+
+<div align="center">
+
+<br />
+
+**Built with ❤️ for knowledge-sharing communities**
+
+<br />
+
+[![GitHub Stars](https://img.shields.io/github/stars/sonivishal66666/Answerhub?style=social)](https://github.com/sonivishal66666/Answerhub)
+[![GitHub Forks](https://img.shields.io/github/forks/sonivishal66666/Answerhub?style=social)](https://github.com/sonivishal66666/Answerhub)
+
+</div>

@@ -246,8 +246,7 @@ export function AuthProvider({ children }) {
       if (error) throw error
       return { data, error: null }
     } catch (error) {
-      console.error('AnswerHub Auth: signUp error:', error)
-      throw error
+      return { data: null, error }
     } finally {
       setLoading(false)
     }
@@ -267,8 +266,7 @@ export function AuthProvider({ children }) {
       if (error) throw error
       return { data, error: null }
     } catch (error) {
-      console.error('AnswerHub Auth: signIn error:', error)
-      throw error
+      return { data: null, error }
     } finally {
       setLoading(false)
     }
@@ -281,14 +279,13 @@ export function AuthProvider({ children }) {
     setLoading(true)
     try {
       const { error } = await supabase.auth.signOut()
-      if (error) {
-        console.error('AnswerHub Auth: Supabase signOut returned an error:', error.message)
-      }
-    } catch (error) {
-      console.error('AnswerHub Auth: Unexpected error during signOut:', error)
-    } finally {
+      if (error) throw error
       setCurrentUser(null)
       setSession(null)
+      return { error: null }
+    } catch (error) {
+      return { error }
+    } finally {
       setLoading(false)
     }
   }
@@ -304,8 +301,7 @@ export function AuthProvider({ children }) {
       if (error) throw error
       return { error: null }
     } catch (error) {
-      console.error('AnswerHub Auth: resetPassword error:', error)
-      throw error
+      return { error }
     }
   }
 
@@ -313,7 +309,7 @@ export function AuthProvider({ children }) {
    * Update the current user's profile in the users table.
    */
   const updateProfile = async (updates) => {
-    if (!user) throw new Error('Not authenticated')
+    if (!user) return { error: { message: 'Not authenticated' } }
 
     try {
       const { data, error } = await supabase
@@ -328,8 +324,7 @@ export function AuthProvider({ children }) {
       setCurrentUser(data)
       return { data, error: null }
     } catch (error) {
-      console.error('AnswerHub Auth: updateProfile error:', error)
-      throw error
+      return { data: null, error }
     }
   }
 

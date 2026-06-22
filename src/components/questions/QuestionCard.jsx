@@ -8,13 +8,13 @@ import {
   Clock,
   Paperclip,
   CheckCircle2,
-  Volume2,
-  StopCircle,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
 import { useUpvote } from '@/hooks/useUpvote';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useTranslation } from '@/hooks/useTranslation';
+import TranslationButton from '@/components/translation/TranslationButton';
+import TranslationBadge from '@/components/translation/TranslationBadge';
 
 function formatTimeAgo(dateStr) {
   if (!dateStr) return '';
@@ -52,7 +52,20 @@ export default function QuestionCard({ question, index = 0 }) {
   const { user } = useAuth();
   const { showToast } = useToast();
   const { toggleQuestionUpvote, hasUpvotedQuestion } = useUpvote();
-  const { supported: ttsSupported, speakingId, speak, stop: stopSpeak } = useTextToSpeech();
+
+  const preferredLanguage = user?.preferred_language || 'en';
+  const titleTranslation = useTranslation({
+    contentId: `question-title-${id}`,
+    content: title,
+    autoTargetLanguage: preferredLanguage,
+    autoTranslate: Boolean(user?.preferred_language),
+  });
+  const descriptionTranslation = useTranslation({
+    contentId: `question-description-${id}`,
+    content: description,
+    autoTargetLanguage: preferredLanguage,
+    autoTranslate: Boolean(user?.preferred_language),
+  });
 
   const [upvoted, setUpvoted] = useState(false);
   const [localUpvotes, setLocalUpvotes] = useState(upvotes || 0);
@@ -87,8 +100,6 @@ export default function QuestionCard({ question, index = 0 }) {
 
   const author = users || question.author || {};
   const parsedTags = typeof tags === 'string' ? tags.split(',').map((t) => t.trim()).filter(Boolean) : Array.isArray(tags) ? tags : [];
-  const speechId = `question-${id || index}`;
-  const isSpeaking = speakingId === speechId;
 
   return (
     <motion.div
@@ -120,40 +131,57 @@ export default function QuestionCard({ question, index = 0 }) {
         {/* Main content */}
         <div className="flex-1 min-w-0">
           {/* Title */}
-          <Link
-            to={`/question/${id}`}
-            className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors line-clamp-1 block"
-          >
-            {title}
-          </Link>
+          <div className="flex items-start justify-between gap-3">
+            <Link
+              to={`/question/${id}`}
+              className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors block"
+            >
+              {titleTranslation.displayText}
+            </Link>
+            <TranslationButton
+              originalLanguage={titleTranslation.originalLanguage}
+              currentLanguage={titleTranslation.currentLanguage}
+              isTranslated={titleTranslation.isTranslated}
+              status={titleTranslation.status}
+              error={titleTranslation.error}
+              onTranslate={titleTranslation.translate}
+              onReset={titleTranslation.resetTranslation}
+            />
+          </div>
+          {titleTranslation.isTranslated && (
+            <div className="mt-2">
+              <TranslationBadge
+                originalLanguage={titleTranslation.originalLanguage}
+                targetLanguage={titleTranslation.currentLanguage}
+              />
+            </div>
+          )}
 
           {/* Description preview */}
           {description && (
-            <div className="mt-1.5 flex items-start gap-2">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed flex-1">
-                {description}
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!ttsSupported) return;
-                  if (isSpeaking) {
-                    stopSpeak();
-                    return;
-                  }
-                  speak(description, speechId);
-                }}
-                disabled={!ttsSupported}
-                className={`mt-0.5 inline-flex items-center justify-center rounded-md p-1 transition-colors ${
-                  ttsSupported
-                    ? 'text-indigo-500 hover:text-indigo-600'
-                    : 'text-zinc-400 cursor-not-allowed'
-                }`}
-                aria-label={isSpeaking ? 'Stop readout' : 'Read message'}
-                title={ttsSupported ? (isSpeaking ? 'Stop readout' : 'Read message') : 'Readout not supported'}
-              >
-                {isSpeaking ? <StopCircle className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-              </button>
+            <div className="mt-3">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {descriptionTranslation.displayText}
+                </p>
+                <TranslationButton
+                  originalLanguage={descriptionTranslation.originalLanguage}
+                  currentLanguage={descriptionTranslation.currentLanguage}
+                  isTranslated={descriptionTranslation.isTranslated}
+                  status={descriptionTranslation.status}
+                  error={descriptionTranslation.error}
+                  onTranslate={descriptionTranslation.translate}
+                  onReset={descriptionTranslation.resetTranslation}
+                />
+              </div>
+              {descriptionTranslation.isTranslated && (
+                <div className="mt-2">
+                  <TranslationBadge
+                    originalLanguage={descriptionTranslation.originalLanguage}
+                    targetLanguage={descriptionTranslation.currentLanguage}
+                  />
+                </div>
+              )}
             </div>
           )}
 
