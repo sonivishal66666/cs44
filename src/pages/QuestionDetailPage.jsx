@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronUp, Eye, Clock, Paperclip, ChevronRight, Home, Tag, Trash2 } from 'lucide-react'
+import { ChevronUp, Eye, Clock, Paperclip, ChevronRight, Home, Tag } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import Avatar from '@/components/ui/Avatar'
 import Card from '@/components/ui/Card'
@@ -14,6 +14,9 @@ import { useAnswers } from '@/hooks/useAnswers'
 import { useUpvote } from '@/hooks/useUpvote'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/Toast'
+import { useTranslation } from '@/hooks/useTranslation'
+import TranslationButton from '@/components/translation/TranslationButton'
+import TranslationBadge from '@/components/translation/TranslationBadge'
 
 function timeAgo(dateString) {
   const now = new Date()
@@ -31,26 +34,27 @@ function timeAgo(dateString) {
 
 export default function QuestionDetailPage() {
   const { id } = useParams()
-  const { question, loading: qLoading, fetchQuestionById, deleteQuestion } = useQuestions()
+  const { question, loading: qLoading, fetchQuestionById } = useQuestions()
   const { answers, loading: aLoading, fetchAnswers, verifyAnswer, rejectAnswer, markSpam, deleteAnswer } = useAnswers()
   const { toggleQuestionUpvote, hasUpvotedQuestion } = useUpvote()
   const { user, isAdmin } = useAuth()
   const { showToast } = useToast()
-  const navigate = useNavigate()
   const [upvoted, setUpvoted] = useState(false)
   const [localUpvotes, setLocalUpvotes] = useState(0)
 
-  const handleQuestionDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this question? This will also delete all associated answers.")) {
-      try {
-        await deleteQuestion(question.id)
-        showToast('Question deleted successfully', 'info')
-        navigate('/')
-      } catch (err) {
-        showToast('Failed to delete question', 'error')
-      }
-    }
-  }
+  const preferredLanguage = user?.preferred_language || 'en'
+  const titleTranslation = useTranslation({
+    contentId: `question-title-${question?.id}`,
+    content: question?.title,
+    autoTargetLanguage: preferredLanguage,
+    autoTranslate: Boolean(user?.preferred_language),
+  })
+  const descriptionTranslation = useTranslation({
+    contentId: `question-description-${question?.id}`,
+    content: question?.description,
+    autoTargetLanguage: preferredLanguage,
+    autoTranslate: Boolean(user?.preferred_language),
+  })
 
   useEffect(() => {
     if (id) {
@@ -187,14 +191,58 @@ export default function QuestionDetailPage() {
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-4">
-              {question.title}
-            </h1>
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">
+                    {titleTranslation.displayText}
+                  </h1>
+                  {titleTranslation.isTranslated && (
+                    <div className="mt-2">
+                      <TranslationBadge
+                        originalLanguage={titleTranslation.originalLanguage}
+                        targetLanguage={titleTranslation.currentLanguage}
+                      />
+                    </div>
+                  )}
+                </div>
+                <TranslationButton
+                  originalLanguage={titleTranslation.originalLanguage}
+                  currentLanguage={titleTranslation.currentLanguage}
+                  isTranslated={titleTranslation.isTranslated}
+                  status={titleTranslation.status}
+                  error={titleTranslation.error}
+                  onTranslate={titleTranslation.translate}
+                  onReset={titleTranslation.resetTranslation}
+                />
+              </div>
 
-            <div className="prose prose-slate dark:prose-invert max-w-none mb-6">
-              <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-                {question.description}
-              </p>
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                      {descriptionTranslation.displayText}
+                    </p>
+                    {descriptionTranslation.isTranslated && (
+                      <div className="mt-2">
+                        <TranslationBadge
+                          originalLanguage={descriptionTranslation.originalLanguage}
+                          targetLanguage={descriptionTranslation.currentLanguage}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <TranslationButton
+                    originalLanguage={descriptionTranslation.originalLanguage}
+                    currentLanguage={descriptionTranslation.currentLanguage}
+                    isTranslated={descriptionTranslation.isTranslated}
+                    status={descriptionTranslation.status}
+                    error={descriptionTranslation.error}
+                    onTranslate={descriptionTranslation.translate}
+                    onReset={descriptionTranslation.resetTranslation}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Attachment */}
@@ -235,16 +283,6 @@ export default function QuestionDetailPage() {
                   <Paperclip className="w-4 h-4" />
                   Attachment
                 </span>
-              )}
-              {(isAdmin || (user && user.id === question.user_id)) && (
-                <button
-                  onClick={handleQuestionDelete}
-                  className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600 dark:hover:text-red-450 transition-colors font-semibold cursor-pointer"
-                  title="Delete Question"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete Question
-                </button>
               )}
               <div className="ml-auto flex items-center gap-2">
                 <Avatar

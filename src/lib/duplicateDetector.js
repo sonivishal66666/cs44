@@ -1,3 +1,7 @@
+import {
+  generateEmbedding,
+  cosineSimilarity,
+} from './embeddingUtils'
 import Fuse from 'fuse.js'
 
 /**
@@ -19,7 +23,7 @@ const duplicateOptions = {
  * @param {string} newTitle - The title of the new question to check
  * @returns {Array} Array of similar questions with score, match info, and duplicate flag
  */
-export function findDuplicates(existingQuestions, newTitle) {
+export async function findDuplicates(existingQuestions, newTitle) {
   if (
     !newTitle ||
     !newTitle.trim() ||
@@ -31,12 +35,73 @@ export function findDuplicates(existingQuestions, newTitle) {
 
   const fuse = new Fuse(existingQuestions, duplicateOptions)
   const results = fuse.search(newTitle.trim())
+  try {
+
+  const candidates =
+    results.slice(0, 10)
+
+  const queryEmbedding =
+    await generateEmbedding(
+      newTitle
+    )
+
+  const enrichedResults = []
+
+  for (const result of candidates) {
+
+    const candidateEmbedding =
+      await generateEmbedding(
+        result.item.title
+      )
+
+    const semanticScore =
+      cosineSimilarity(
+        queryEmbedding,
+        candidateEmbedding
+      )
+
+    const fuseScore =
+      1 - (
+        result.score || 0
+      )
+
+    const finalScore =
+      (semanticScore * 0.7)
+      +
+      (fuseScore * 0.3)
+
+    enrichedResults.push({
+      item: result.item,
+      score: result.score,
+      semanticScore,
+      finalScore,
+      matches:
+        result.matches || [],
+      isPotentialDuplicate:
+        finalScore > 0.75,
+    })
+  }
+
+  return enrichedResults
+    .filter(
+      r => r.finalScore > 0.6
+    )
+    .sort(
+      (a, b) =>
+        b.finalScore -
+        a.finalScore
+    )
+
+} catch (error) {
+  console.error('Semantic duplicate detection failed:', error)
 
   return results.map((result) => ({
     item: result.item,
     score: result.score,
     matches: result.matches || [],
-    // In Fuse.js, lower score = better match. Score < 0.2 means very similar.
-    isPotentialDuplicate: result.score < 0.2,
+    isPotentialDuplicate:
+      result.score < 0.2,
   }))
+}
+  
 }

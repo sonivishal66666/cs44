@@ -12,8 +12,10 @@ import {
   HelpCircle,
   ArrowRight,
   Sparkles,
-} from 'lucide-react';
-
+} from 'lucide-react';import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
+import TranslationButton from '@/components/translation/TranslationButton';
+import TranslationBadge from '@/components/translation/TranslationBadge';
 const faqCategories = [
   {
     id: 1,
@@ -135,6 +137,8 @@ export default function FaqPage() {
     }
   }, [id]);
 
+  const { user } = useAuth();
+  const preferredLanguage = user?.preferred_language || 'en';
   const currentCategory = faqCategories.find((cat) => cat.id === activeCategory) || faqCategories[0];
   
   // Filter questions across current category or all categories if searching
@@ -150,6 +154,120 @@ export default function FaqPage() {
           .map((item) => ({ ...item, categoryName: cat.name, categoryId: cat.id }))
       )
     : currentCategory.questions;
+
+  function FaqItem({ item, idx, isExpanded, onToggle, showLink, activeCategory }) {
+    const categoryId = item.categoryId ?? activeCategory
+    const questionTranslation = useTranslation({
+      contentId: `faq-question-${categoryId}-${idx}`,
+      content: item.q,
+      autoTargetLanguage: preferredLanguage,
+      autoTranslate: Boolean(user?.preferred_language),
+    })
+    const answerTranslation = useTranslation({
+      contentId: `faq-answer-${categoryId}-${idx}`,
+      content: item.a,
+      autoTargetLanguage: preferredLanguage,
+      autoTranslate: Boolean(user?.preferred_language),
+    })
+
+    const handleTranslate = (languageCode) => {
+      if (languageCode === questionTranslation.originalLanguage) {
+        questionTranslation.resetTranslation()
+        answerTranslation.resetTranslation()
+        return
+      }
+      if (languageCode !== questionTranslation.currentLanguage) {
+        questionTranslation.translate(languageCode)
+        answerTranslation.translate(languageCode)
+      }
+    }
+
+    const handleReset = () => {
+      questionTranslation.resetTranslation()
+      answerTranslation.resetTranslation()
+    }
+
+    return (
+      <div
+        className={`border rounded-xl transition-all duration-200 ${
+          isExpanded
+            ? 'border-indigo-500/30 bg-indigo-50/20 dark:bg-indigo-950/10 shadow-sm'
+            : 'border-slate-100 dark:border-slate-700/50 bg-white/40 dark:bg-slate-800/40 hover:bg-slate-50/50 dark:hover:bg-slate-700/20 hover:border-slate-200 dark:hover:border-slate-600'
+        }`}
+      >
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center justify-between text-left p-4 md:p-5 cursor-pointer select-none"
+        >
+          <div className="flex-1 pr-4">
+            {isSearching && item.categoryName && (
+              <span className="inline-block text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full mb-1 border border-indigo-500/10">
+                {item.categoryName}
+              </span>
+            )}
+            <h4 className={`text-sm md:text-base font-bold transition-colors ${
+              isExpanded ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-100'
+            }`}>
+              {questionTranslation.displayText}
+            </h4>
+          </div>
+          <ChevronDown
+            className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-300 ${
+              isExpanded ? 'rotate-180 text-indigo-500' : ''
+            }`}
+          />
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-5 pb-5 pt-1 border-t border-slate-100 dark:border-slate-700/40 text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  {questionTranslation.isTranslated && (
+                    <TranslationBadge
+                      originalLanguage={questionTranslation.originalLanguage}
+                      targetLanguage={questionTranslation.currentLanguage}
+                    />
+                  )}
+                  <TranslationButton
+                    originalLanguage={questionTranslation.originalLanguage}
+                    currentLanguage={questionTranslation.currentLanguage}
+                    isTranslated={questionTranslation.isTranslated}
+                    status={questionTranslation.status || answerTranslation.status}
+                    error={questionTranslation.error || answerTranslation.error}
+                    onTranslate={handleTranslate}
+                    onReset={handleReset}
+                  />
+                </div>
+
+                <p className="text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{answerTranslation.displayText}</p>
+
+                {showLink && item.categoryId && (
+                  <Link
+                    to={`/faq/${item.categoryId}`}
+                    onClick={() => {
+                      setActiveCategory(item.categoryId)
+                      setSearchQuery('')
+                      setExpandedIndex(null)
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-500 hover:text-indigo-600 hover:underline pt-2"
+                  >
+                    View entire category <ArrowRight className="w-3 h-3" />
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    )
+  }
 
   return (
     <motion.main
@@ -325,74 +443,17 @@ export default function FaqPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredQuestions.map((item, idx) => {
-                  const isExpanded = expandedIndex === idx;
-                  
-                  return (
-                    <div
-                      key={idx}
-                      className={`border rounded-xl transition-all duration-200 ${
-                        isExpanded
-                          ? 'border-indigo-500/30 bg-indigo-50/20 dark:bg-indigo-950/10 shadow-sm'
-                          : 'border-slate-100 dark:border-slate-700/50 bg-white/40 dark:bg-slate-800/40 hover:bg-slate-50/50 dark:hover:bg-slate-700/20 hover:border-slate-200 dark:hover:border-slate-600'
-                      }`}
-                    >
-                      {/* Accordion Trigger */}
-                      <button
-                        onClick={() => setExpandedIndex(isExpanded ? null : idx)}
-                        className="w-full flex items-center justify-between text-left p-4 md:p-5 cursor-pointer select-none"
-                      >
-                        <div className="flex-1 pr-4">
-                          {isSearching && item.categoryName && (
-                            <span className="inline-block text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full mb-1 border border-indigo-500/10">
-                              {item.categoryName}
-                            </span>
-                          )}
-                          <h4 className={`text-sm md:text-base font-bold transition-colors ${
-                            isExpanded ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-100'
-                          }`}>
-                            {item.q}
-                          </h4>
-                        </div>
-                        <ChevronDown
-                          className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-300 ${
-                            isExpanded ? 'rotate-180 text-indigo-500' : ''
-                          }`}
-                        />
-                      </button>
-
-                      {/* Accordion Expandable Content */}
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.25, ease: 'easeInOut' }}
-                            className="overflow-hidden"
-                          >
-                            <div className="px-5 pb-5 pt-1 border-t border-slate-100 dark:border-slate-700/40 text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
-                              <p>{item.a}</p>
-                              {isSearching && item.categoryId && (
-                                <Link
-                                  to={`/faq/${item.categoryId}`}
-                                  onClick={() => {
-                                    setActiveCategory(item.categoryId);
-                                    setSearchQuery('');
-                                    setExpandedIndex(null);
-                                  }}
-                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-500 hover:text-indigo-600 hover:underline pt-2"
-                                >
-                                  View entire category <ArrowRight className="w-3 h-3" />
-                                </Link>
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
+                {filteredQuestions.map((item, idx) => (
+                  <FaqItem
+                    key={idx}
+                    item={item}
+                    idx={idx}
+                    isExpanded={expandedIndex === idx}
+                    onToggle={() => setExpandedIndex(expandedIndex === idx ? null : idx)}
+                    showLink={isSearching && item.categoryId}
+                    activeCategory={activeCategory}
+                  />
+                ))}
               </div>
             )}
           </div>
